@@ -1,0 +1,67 @@
+using com.softwareag.connectivity.ConnectivityPlugins;
+using com.apama.correlator.timeformat.TimeFormat;
+
+
+event LoadingDone {}
+
+monitor FraudDetection {
+	
+	import "ApamaONNXPlugin" as onnx; 
+	
+	action onload() {
+		log "Loaded monitor FraudDetection" at INFO;
+		//Load the model you want to use
+		onnx.loadModel("model/lightgbm_fraud_detection_onnx");
+		on LoadingDone() and not wait(30.0) {
+			log "Loaded infos done" at INFO;
+
+			ConnectivityPlugins.onApplicationInitialized();
+			handleTransactions();
+		}
+		
+	}
+	
+	
+	action handleTransactions() {
+		monitor.subscribe("mqtt:transactions");
+		on all Transaction() as t {
+			t.timestamp := TimeFormat.getMicroTime();
+			route EnrichmentRequest(t);
+		}
+		on all EnrichmentResponse() as eresp {
+			FraudDetectionRequest r := eresp.fraudDetectionData;
+			runPrediction(r);
+		}
+	}
+	
+	action runPrediction(FraudDetectionRequest r) {
+		sequence<float> input := toFloatArray(r);
+		sequence<any> result := onnx.executeModel(input);
+		//log (TimeFormat.getMicroTime() - r.timestamp).toString() + "s " + result.toString();
+		integer predictedFraud := <integer> result[0];
+		if predictedFraud > 0 {
+			log "Found Potential Fraud: " + r.cc_num + " is it actual fraud: " + r.isFraud;
+		}
+	}
+	
+	action toFloatArray(FraudDetectionRequest r) returns sequence<float> {
+        return [
+            r.cc_num.toFloat(),
+            r.category.toFloat(),
+            r.amt,
+            r.merchant.toFloat(),
+            r.transaction_weekday.toFloat(),
+            r.transaction_month.toFloat(),
+            r.transaction_hour.toFloat(),
+            r.gender.toFloat(),
+            r.zip.toFloat(),
+            r.city_pop.toFloat(),
+            r.job.toFloat(),
+            r.age.toFloat(),
+            r.setting.toFloat(),
+            r.age_group.toFloat(),
+            r.distance_from_home
+        ];
+	}
+	
+}

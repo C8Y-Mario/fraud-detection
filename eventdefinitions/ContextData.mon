@@ -1,0 +1,38 @@
+
+event Merchant {
+	wildcard string category;
+	wildcard string merchant_name;
+	wildcard integer merchantCode;
+}
+
+
+event Customer {
+	wildcard string ssn;
+    wildcard integer cc_num;
+    wildcard string first;
+    wildcard string last;
+    wildcard string gender;
+    wildcard string street;
+    wildcard string city;
+    wildcard string state;
+    wildcard string zip;
+    wildcard float latitude;
+    wildcard float longitude;
+    wildcard integer city_pop;
+    wildcard string job;
+    wildcard string dob;
+    wildcard string acct_num;
+    wildcard string profile;
+    wildcard integer age;
+    wildcard string setting;
+    wildcard string age_group;
+    wildcard integer code;
+}
+
+event EnrichmentRequest {
+	Transaction transaction;
+}
+
+event EnrichmentResponse {
+	FraudDetectionRequest fraudDetectionData;
+}

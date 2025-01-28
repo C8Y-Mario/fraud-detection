@@ -1,0 +1,42 @@
+//cc_num,trans_num,amt,merchant,transaction_date,merch_lat,merch_long,is_fraud
+event Transaction {
+	wildcard string transactionId;
+	wildcard integer creditCardNumber;
+	wildcard float amount;
+	wildcard string merchant;
+	wildcard string transactionDate;
+	wildcard float merchantLatitude;
+	wildcard float merchantLongitude;
+	
+	wildcard float isFraud;
+	
+	wildcard float timestamp;
+}
+
+event FraudDetectionRequest {
+	   wildcard integer cc_num;
+	   wildcard integer category;
+	   wildcard float amt;
+	   wildcard integer merchant;
+	   wildcard integer gender;
+	   wildcard integer city_pop;
+	   wildcard integer job;
+	   wildcard integer age;
+	   wildcard integer transaction_weekday;
+	   wildcard integer transaction_month;
+	   wildcard integer transaction_hour;
+	   wildcard integer zip;
+
+	   wildcard integer setting;
+	   wildcard integer age_group;
+	   wildcard float distance_from_home;
+	   
+	   wildcard float timestamp;
+	   wildcard boolean isFraud;
+	
+}
+
+event FraudDetectionResponse {
+	wildcard integer predictedLabel;
+	wildcard float noFraudProbability;
+}
